@@ -27,7 +27,7 @@ public class RenderSystem extends SortedIteratingSystem implements Disposable {
     private final OrthographicCamera camera;
     private final Viewport viewport;
 
-    private final BatchTiledMapRenderer tiledRenderer;
+    private final PublicLayerRenderer tiledRenderer;
     private final List<MapLayer> fgdLayers;
     private final List<MapLayer> bgdLayers;
 
@@ -40,7 +40,7 @@ public class RenderSystem extends SortedIteratingSystem implements Disposable {
         this.batch = batch;
         this.viewport = viewport;
         this.camera = camera;
-        this.tiledRenderer = new OrthogonalTiledMapRenderer(null, GdxGame.UNIT_SCALE, batch);
+        this.tiledRenderer = new PublicLayerRenderer(null, GdxGame.UNIT_SCALE, batch);
         this.fgdLayers = new ArrayList<>();
         this.bgdLayers = new ArrayList<>();
     }
@@ -56,13 +56,13 @@ public class RenderSystem extends SortedIteratingSystem implements Disposable {
         batch.begin();
         batch.setColor(Color.WHITE);
         this.tiledRenderer.setView(camera);
-        bgdLayers.forEach(tiledRenderer::renderMapLayer);
+        bgdLayers.forEach(layer -> tiledRenderer.renderMapLayer(layer));
 
         forceSort();
         super.update(deltaTime);
 
         batch.setColor(Color.WHITE);
-        fgdLayers.forEach(tiledRenderer::renderMapLayer);
+        fgdLayers.forEach(layer -> tiledRenderer.renderMapLayer(layer));
         batch.end();
     }
 
@@ -116,5 +116,16 @@ public class RenderSystem extends SortedIteratingSystem implements Disposable {
     @Override
     public void dispose() {
         this.tiledRenderer.dispose();
+    }
+
+    private static class PublicLayerRenderer extends OrthogonalTiledMapRenderer {
+        public PublicLayerRenderer(com.badlogic.gdx.maps.tiled.TiledMap map, float unitScale, Batch batch) {
+            super(map, unitScale, batch);
+        }
+
+        @Override
+        public void renderMapLayer(MapLayer layer) {
+            super.renderMapLayer(layer);
+        }
     }
 }
